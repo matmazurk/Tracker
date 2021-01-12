@@ -1,3 +1,10 @@
 <resources>
     <string name="app_name">Tracker</string>
+    <string name="options">Options</string>
+    <string name="content_description_options">Tracking options...</string>
+    <string name="content_description_fab">Start tracking FAB</string>
+    <string name="search">Search</string>
+    <string name="content_description_search">Search recorded tracks</string>
+    <string name="share">Share</string>
+    <string name="content_description_share">Track sharing</string>
 </resources>
