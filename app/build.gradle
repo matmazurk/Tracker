@@ -62,4 +62,7 @@ dependencies {
 
     //Fused location provider
     implementation "com.google.android.gms:play-services-location:17.1.0"
+
+    //Work Manager
+    implementation "androidx.work:work-runtime-ktx:$work_version"
 }
