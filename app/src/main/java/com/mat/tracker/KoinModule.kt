@@ -16,4 +16,8 @@ val appModule = module {
     single {
         LocationManager(androidContext())
     }
+
+    factory {
+        Repository(get<TrackerDatabase>().locationsDao(), get())
+    }
 }
