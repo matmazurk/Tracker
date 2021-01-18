@@ -66,4 +66,7 @@ dependencies {
 
     //Work Manager
     implementation "androidx.work:work-runtime-ktx:$work_version"
+
+    //Dexter permission library
+    implementation 'com.karumi:dexter:6.2.2'
 }
