@@ -1,5 +1,6 @@
 <resources>
     <string name="app_name">Tracker</string>
+    <string name="permissions_db_name">permissions</string>
     <string name="options">Options</string>
     <string name="content_description_options">Tracking options...</string>
     <string name="content_description_fab">Start tracking FAB</string>
