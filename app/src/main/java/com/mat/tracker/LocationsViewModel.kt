@@ -1,9 +1,6 @@
 package com.mat.tracker
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.asLiveData
+import androidx.lifecycle.*
 
 class LocationsViewModel(
     private val repository: Repository
@@ -12,7 +9,13 @@ class LocationsViewModel(
     val locations: LiveData<List<LocationData>>
         get() = repository.getLocations().asLiveData()
 
-    val receivingLocationUpdates: LiveData<Boolean> = repository.receivingLocationUpdates
+    val state: LiveData<TrackerActivity.State> = Transformations.map(repository.receivingLocationUpdates) {
+        if (it) {
+            TrackerActivity.State.TRACING
+        } else {
+            TrackerActivity.State.NOT_TRACING
+        }
+    }
 
     fun startTracking() {
         try {

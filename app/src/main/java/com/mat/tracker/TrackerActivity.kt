@@ -13,4 +13,9 @@ class TrackerActivity : AppCompatActivity() {
         binding = ActivityTrackerBinding.inflate(layoutInflater)
         setContentView(binding.root)
     }
+
+    enum class State {
+        TRACING,
+        NOT_TRACING
+    }
 }
