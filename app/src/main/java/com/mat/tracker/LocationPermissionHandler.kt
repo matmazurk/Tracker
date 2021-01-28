@@ -22,8 +22,7 @@ import org.koin.core.component.inject
 
 @KoinApiExtension
 class LocationPermissionHandler(
-    private val activity: AppCompatActivity,
-//    private val block: () -> Unit
+    private val activity: AppCompatActivity
 ) : KoinComponent {
     private val dataStore: PermissionsDataStore by inject()
 
@@ -38,7 +37,7 @@ class LocationPermissionHandler(
 
     private val navigateToSettingsPageAndCheckBackgroundLocationPermission =
         activity.registerForActivityResult(StartActivityForResult()) {
-            if (activity.checkSelfPermission(Manifest.permission.ACCESS_BACKGROUND_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            if (activity.hasPermission(Manifest.permission.ACCESS_BACKGROUND_LOCATION)) {
                 backgroundPermissionGrantedInvokeBlock.invoke()
             }
         }
@@ -99,7 +98,7 @@ class LocationPermissionHandler(
     fun checkBackgroundLocationAndRun(block: () -> Unit) {
         backgroundPermissionGrantedInvokeBlock = block
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
-            if (activity.checkSelfPermission(Manifest.permission.ACCESS_BACKGROUND_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            if (activity.hasPermission(Manifest.permission.ACCESS_BACKGROUND_LOCATION)) {
                 backgroundPermissionGrantedInvokeBlock.invoke()
             } else {
                 showBackgroundLocationPermissionsRationaleDialog(activity) {

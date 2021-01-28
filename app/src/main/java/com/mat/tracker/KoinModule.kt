@@ -5,6 +5,7 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.createDataStore
 import androidx.room.Room
 import org.koin.android.ext.koin.androidContext
+import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
 
 val appModule = module {
@@ -24,7 +25,11 @@ val appModule = module {
         PermissionsDataStore(androidContext())
     }
 
-    factory {
+    single {
         Repository(get<TrackerDatabase>().locationsDao(), get())
+    }
+
+    viewModel {
+        LocationsViewModel(get())
     }
 }

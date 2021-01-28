@@ -3,6 +3,7 @@ package com.mat.tracker
 import android.Manifest
 import android.app.PendingIntent
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.Location
 import androidx.annotation.MainThread
@@ -29,7 +30,9 @@ class LocationManager(private val context: Context) {
     }
 
     private val locationUpdatePendingIntent: PendingIntent by lazy {
-        TODO()
+        val intent = Intent(context, LocationUpdatesBroadcastReceiver::class.java)
+        intent.action = LocationUpdatesBroadcastReceiver.ACTION_LOCATION_UPDATE
+        PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
     }
 
     @Throws(SecurityException::class)
