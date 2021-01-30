@@ -3,13 +3,17 @@ package com.mat.tracker
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.util.Log
 import com.google.android.gms.location.LocationResult
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 
-class LocationUpdatesBroadcastReceiver(
-        private val locationRepository: Repository
-) : BroadcastReceiver() {
+class LocationUpdatesBroadcastReceiver : BroadcastReceiver(), KoinComponent {
+
+    private val locationRepository: Repository by inject()
 
     override fun onReceive(context: Context, intent: Intent) {
 
@@ -18,6 +22,7 @@ class LocationUpdatesBroadcastReceiver(
                 val locations = locationsResult.locations.map { location ->
                     location.toLocationData()
                 }
+                Log.i("new location", "$locations")
                 GlobalScope.launch {
                     locationRepository.saveLocations(locations)
                 }

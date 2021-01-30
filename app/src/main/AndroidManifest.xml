@@ -19,6 +19,12 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <receiver
+            android:name=".LocationUpdatesBroadcastReceiver">
+            <intent-filter>
+                <action android:name="com.mat.tracker.action.LOCATION_UPDATE" />
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>

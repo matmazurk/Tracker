@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.Location
+import android.util.Log
 import androidx.annotation.MainThread
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.LiveData
@@ -26,6 +27,7 @@ class LocationManager(private val context: Context) {
     private val locationRequest: LocationRequest = LocationRequest().apply {
         interval = TimeUnit.SECONDS.toMillis(INTERVAL_DURATION_SECONDS)
         fastestInterval = TimeUnit.SECONDS.toMillis(FASTEST_INTERVAL_DURATION_SECONDS)
+        maxWaitTime = TimeUnit.MINUTES.toMillis(MAX_WAIT_TIME_MINUTES)
         priority = LocationRequest.PRIORITY_HIGH_ACCURACY
     }
 
@@ -39,12 +41,10 @@ class LocationManager(private val context: Context) {
     @MainThread
     fun startLocationUpdates() {
 
-        if (context.checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION)
-                != PackageManager.PERMISSION_GRANTED) return
+        if (!context.hasPermission(Manifest.permission.ACCESS_FINE_LOCATION)) return
 
         try {
             _receivingLocationUpdates.value = true
-
             fusedLocationClient.requestLocationUpdates(locationRequest, locationUpdatePendingIntent)
         } catch (permissionRevoked: SecurityException) {
             _receivingLocationUpdates.value = false
@@ -61,5 +61,6 @@ class LocationManager(private val context: Context) {
     companion object {
         private const val INTERVAL_DURATION_SECONDS = 60L
         private const val FASTEST_INTERVAL_DURATION_SECONDS = 30L
+        private const val MAX_WAIT_TIME_MINUTES = 2L
     }
 }

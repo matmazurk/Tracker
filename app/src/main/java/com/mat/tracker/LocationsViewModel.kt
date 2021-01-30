@@ -1,13 +1,17 @@
 package com.mat.tracker
 
+import android.util.Log
 import androidx.lifecycle.*
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
 
 class LocationsViewModel(
     private val repository: Repository
 ) : ViewModel() {
 
-    val locations: LiveData<List<LocationData>>
-        get() = repository.getLocations().asLiveData()
+    private val locations: Flow<List<LocationData>>
+        get() = repository.getLocations()
 
     val state: LiveData<TrackerActivity.State> = Transformations.map(repository.receivingLocationUpdates) {
         if (it) {
@@ -17,6 +21,11 @@ class LocationsViewModel(
         }
     }
 
+    fun clearLocations() =
+        viewModelScope.launch {
+            repository.clearDatabase()
+        }
+
     fun startTracking() {
         try {
             repository.startTrackingLocation()
@@ -25,8 +34,12 @@ class LocationsViewModel(
         }
     }
 
-    fun stopTracking() =
+    fun stopTracking() {
         repository.stopTrackingLocation()
+        viewModelScope.launch {
+            locations.collect {
 
-
+            }
+        }
+    }
 }
