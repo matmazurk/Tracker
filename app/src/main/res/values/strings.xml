@@ -8,4 +8,5 @@
     <string name="content_description_search">Search recorded tracks</string>
     <string name="share">Share</string>
     <string name="content_description_share">Track sharing</string>
+    <string name="no_recorded_tracks">No recorded tracks</string>
 </resources>
