@@ -1,6 +1,5 @@
 package com.mat.tracker
 
-import android.util.Log
 import androidx.lifecycle.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
@@ -10,8 +9,7 @@ class LocationsViewModel(
     private val repository: Repository
 ) : ViewModel() {
 
-    private val locations: Flow<List<LocationData>>
-        get() = repository.getLocations()
+    val locations: LiveData<List<LocationData>> = repository.getLocations().asLiveData()
 
     val state: LiveData<TrackerActivity.State> = Transformations.map(repository.receivingLocationUpdates) {
         if (it) {
@@ -20,6 +18,14 @@ class LocationsViewModel(
             TrackerActivity.State.NOT_TRACING
         }
     }
+
+    fun saveLocationsToFile(
+        filename: String,
+        locations: List<LocationData>
+    ) =
+        viewModelScope.launch {
+            repository.writeLocationsToFile(filename, locations)
+        }
 
     fun clearLocations() =
         viewModelScope.launch {
@@ -36,10 +42,5 @@ class LocationsViewModel(
 
     fun stopTracking() {
         repository.stopTrackingLocation()
-        viewModelScope.launch {
-            locations.collect {
-
-            }
-        }
     }
 }

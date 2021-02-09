@@ -9,4 +9,11 @@
     <string name="share">Share</string>
     <string name="content_description_share">Track sharing</string>
     <string name="no_recorded_tracks">No recorded tracks</string>
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="save">Save</string>
+    <string name="append">Append</string>
+    <string name="discard">Discard</string>
+    <string name="cancel">Cancel</string>
+    <string name="remaining_points_dialog_title">Handle saved points</string>
+    <string name="remaining_points_dialog_message">There are remaining points from last recording.</string>
 </resources>

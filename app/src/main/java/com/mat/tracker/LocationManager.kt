@@ -59,8 +59,8 @@ class LocationManager(private val context: Context) {
     }
 
     companion object {
-        private const val INTERVAL_DURATION_SECONDS = 60L
-        private const val FASTEST_INTERVAL_DURATION_SECONDS = 30L
-        private const val MAX_WAIT_TIME_MINUTES = 2L
+        private const val INTERVAL_DURATION_SECONDS = 30L
+        private const val FASTEST_INTERVAL_DURATION_SECONDS = 15L
+        private const val MAX_WAIT_TIME_MINUTES = 1L
     }
 }

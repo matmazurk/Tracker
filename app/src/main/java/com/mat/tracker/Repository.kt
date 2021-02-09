@@ -1,20 +1,20 @@
 package com.mat.tracker
 
-import android.location.Location
-import android.os.Environment
+import android.content.Context
 import android.util.Log
 import androidx.annotation.MainThread
-import kotlinx.coroutines.*
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 import org.xmlpull.v1.XmlPullParserFactory
 import org.xmlpull.v1.XmlSerializer
 import java.io.File
-import java.io.StringWriter
-import java.util.concurrent.ExecutorService
+import java.util.*
+import java.util.Calendar.*
 
 class Repository(
     private val locationsDao: LocationsDao,
     private val locationManager: LocationManager,
-) {
+) : KoinComponent {
 
     val receivingLocationUpdates = locationManager.receivingLocationUpdates
 
@@ -39,15 +39,31 @@ class Repository(
     suspend fun clearDatabase() =
         locationsDao.nukeTable()
 
-    fun writeXmlToFile(
-            locations: List<LocationData>,
-            fileName: String,
-            description: String,
-            authorName: String,
-            time: String
+    suspend fun writeLocationsToFile(
+        filename: String,
+        locations: List<LocationData>
     ) {
+        val currentDate = Date()
+        writeGpxFile(
+            locations,
+            filename,
+            "",
+            "",
+            currentDate.time
+        )
+        clearDatabase()
+    }
+
+    private fun writeGpxFile(
+        locations: List<LocationData>,
+        fileName: String,
+        description: String,
+        authorName: String,
+        time: Long
+    ) {
+        val context: Context by inject()
         val serializer = prepareXmlSerializer(locations, fileName, description, authorName, time)
-        var filePath = "${Environment.getDataDirectory()}${fileName}"
+        var filePath = "${context.dataDir}/${fileName}.gpx"
         var file = File(filePath)
         if (file.exists()) {
             filePath = "${filePath}_1"
@@ -63,7 +79,7 @@ class Repository(
         fileName: String,
         description: String,
         authorName: String,
-        time: String
+        time: Long
     ): XmlSerializer  {
         val serializer = XmlPullParserFactory.newInstance().newSerializer()
         val minLat = locations.minByOrNull { it.latitude }?.latitude ?: 0
@@ -91,7 +107,7 @@ class Repository(
             endTag(null, "name")
             endTag(null, "author")
             startTag(null, "time")
-            text(time)
+            text(convertMillisToFormattedString(time))
             endTag(null, "time")
             startTag(null, "bounds")
             attribute(null, "minlat", minLat.toString())
@@ -112,7 +128,7 @@ class Repository(
                 text(it.altitude.toString())
                 endTag(null, "ele")
                 startTag(null, "time")
-                text(it.time.toString())
+                text(convertMillisToFormattedString(it.time))
                 endTag(null, "time")
                 endTag(null, "trkpt")
             }
@@ -120,6 +136,21 @@ class Repository(
             endTag(null, "gpx")
         }
         return serializer
+    }
+
+    private fun convertMillisToFormattedString(millis: Long): String {
+        val date = Date(millis)
+        val calendar = Calendar.getInstance().apply {
+            time = date
+        }
+        val year = calendar.get(YEAR)
+        val month = calendar.get(MONTH)
+        val day = calendar.get(DAY_OF_MONTH)
+        val hour = calendar.get(HOUR_OF_DAY)
+        val minute = calendar.get(MINUTE)
+        val second = calendar.get(SECOND)
+
+        return "$year-$month-${day}T$hour:$minute:${second}Z"
     }
 
 }
