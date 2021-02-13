@@ -1,13 +1,16 @@
 package com.mat.tracker
 
 import android.content.Context
-import android.util.Log
+import android.os.FileObserver
 import androidx.annotation.MainThread
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import org.xmlpull.v1.XmlPullParserFactory
 import org.xmlpull.v1.XmlSerializer
 import java.io.File
+import java.io.OutputStreamWriter
 import java.util.*
 import java.util.Calendar.*
 
@@ -16,7 +19,17 @@ class Repository(
     private val locationManager: LocationManager,
 ) : KoinComponent {
 
+    val newFileEvent: LiveData<Event<String?>>
+        get() = _newFileEvent
+    val files: LiveData<List<String>>
+        get() = _files
     val receivingLocationUpdates = locationManager.receivingLocationUpdates
+
+    private val context: Context by inject()
+    private val appDirPath = "${context.dataDir}/"
+    private val _newFileEvent: MutableLiveData<Event<String?>> = MutableLiveData()
+    private val _files: MutableLiveData<List<String>> = MutableLiveData()
+    private lateinit var fileObserver: FileObserver
 
     fun getLocations() =
         locationsDao.getAllLocations()
@@ -38,6 +51,38 @@ class Repository(
 
     suspend fun clearDatabase() =
         locationsDao.nukeTable()
+
+    fun startFileObserver() {
+        val appDir = File(appDirPath)
+        _files.postValue(extractGpxFilesFromDir(appDir))
+        fileObserver = object: FileObserver(appDir) {
+            override fun onEvent(event: Int, file: String?) {
+                when(event) {
+                    CREATE -> {
+                        _newFileEvent.postValue(Event(file))
+                        _files.postValue(extractGpxFilesFromDir(appDir))
+                    }
+                    DELETE, MOVED_FROM, MOVED_TO -> {
+                        _files.postValue(extractGpxFilesFromDir(appDir))
+                    }
+                }
+            }
+        }
+        fileObserver.startWatching()
+    }
+
+    private fun extractGpxFilesFromDir(dir: File): List<String> =
+        dir.listFiles()
+            .filter {
+                it.name.contains(".gpx")
+            }
+            .map {
+                it.name.replace(".gpx", "")
+            }
+
+    fun stopFileObserver() {
+        fileObserver.stopWatching()
+    }
 
     suspend fun writeLocationsToFile(
         filename: String,
@@ -61,20 +106,19 @@ class Repository(
         authorName: String,
         time: Long
     ) {
-        val context: Context by inject()
-        val serializer = prepareXmlSerializer(locations, fileName, description, authorName, time)
-        var filePath = "${context.dataDir}/${fileName}.gpx"
+        var filePath = "${appDirPath}${fileName}.gpx"
         var file = File(filePath)
         if (file.exists()) {
             filePath = "${filePath}_1"
             file = File(filePath)
         }
         file.createNewFile()
-        serializer.setOutput(file.writer())
+        val serializer = prepareXmlSerializer(file.writer(), locations, fileName, description, authorName, time)
         serializer.endDocument()
     }
 
     private fun prepareXmlSerializer(
+        output: OutputStreamWriter,
         locations: List<LocationData>,
         fileName: String,
         description: String,
@@ -82,6 +126,7 @@ class Repository(
         time: Long
     ): XmlSerializer  {
         val serializer = XmlPullParserFactory.newInstance().newSerializer()
+        serializer.setOutput(output)
         val minLat = locations.minByOrNull { it.latitude }?.latitude ?: 0
         val maxLat = locations.maxByOrNull { it.latitude }?.latitude ?: 0
         val minLon = locations.minByOrNull { it.longitude }?.longitude ?: 0
@@ -120,7 +165,7 @@ class Repository(
             text("Logged by $authorName using Tracker App")
             endTag(null, "src")
             startTag(null, "trkseg")
-            locations.forEach {
+            locations.forEachIndexed { index, it ->
                 startTag(null, "trkpt")
                 attribute(null, "lat", it.latitude.toString())
                 attribute(null, "lon", it.longitude.toString())

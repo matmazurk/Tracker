@@ -2,21 +2,18 @@ package com.mat.tracker
 
 import android.Manifest
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.mat.tracker.databinding.ActivityTrackerBinding
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.viewModel
-import java.util.*
-import java.util.concurrent.TimeUnit
-
 
 class TrackerActivity : AppCompatActivity(), RemainingPointsDialog.Callbacks {
 
@@ -26,7 +23,9 @@ class TrackerActivity : AppCompatActivity(), RemainingPointsDialog.Callbacks {
     }
     private lateinit var binding: ActivityTrackerBinding
     private lateinit var permissionHandler: LocationPermissionHandler
+    private lateinit var recyclerView: RecyclerView
     private var locations: List<LocationData> = listOf()
+    private val recordsAdapter = RecordsAdapter(this)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -35,7 +34,11 @@ class TrackerActivity : AppCompatActivity(), RemainingPointsDialog.Callbacks {
         observeAppState()
         observeLocations()
         permissionHandler = LocationPermissionHandler(this)
+        prepareRecyclerView()
         setFabOnClickListener()
+        observeNewFileEvent()
+        observeFiles()
+        observeTimer()
     }
 
     override fun onPause() {
@@ -43,6 +46,11 @@ class TrackerActivity : AppCompatActivity(), RemainingPointsDialog.Callbacks {
         if (!hasPermission(Manifest.permission.ACCESS_BACKGROUND_LOCATION)) {
             viewModel.stopTracking()
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        viewModel.stopFileObserver()
     }
 
     override fun onDialogSaveButtonSelected() {
@@ -59,16 +67,35 @@ class TrackerActivity : AppCompatActivity(), RemainingPointsDialog.Callbacks {
 
     private fun observeAppState() {
         state.observe(this) { state ->
+                Log.i("app state", "change")
             when (state) {
                 State.TRACING -> {
                     binding.fabTracking.setImageResource(R.drawable.ic_stop_circle_24)
-                    binding.tvTrackingTime.visibility = View.VISIBLE
-                    runTimerCoroutine()
+
                 }
                 State.NOT_TRACING -> {
                     binding.fabTracking.setImageResource(R.drawable.ic_terrain_24)
-                    binding.tvTrackingTime.visibility = View.INVISIBLE
                 }
+            }
+        }
+    }
+
+    private fun observeNewFileEvent() {
+        viewModel.newFileEvent.observe(this) { event ->
+            event.getContentIfNotHandled()?.let { filename ->
+                Toast.makeText(this, "$filename created!", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    private fun observeFiles() {
+        viewModel.startFileObserver()
+        viewModel.files.observe(this) { files ->
+            recordsAdapter.setFiles(files)
+            if (viewModel.files.value.isNullOrEmpty()) {
+                binding.tvNoFiles.visibility = View.VISIBLE
+            } else {
+                binding.tvNoFiles.visibility = View.INVISIBLE
             }
         }
     }
@@ -77,6 +104,12 @@ class TrackerActivity : AppCompatActivity(), RemainingPointsDialog.Callbacks {
         viewModel.locations.observe(this) {
             locations = it
         }
+    }
+
+    private fun prepareRecyclerView() {
+        recyclerView = binding.rvRecords
+        recyclerView.adapter = recordsAdapter
+        recyclerView.layoutManager = GridLayoutManager(this, 3)
     }
 
     private fun setFabOnClickListener() {
@@ -103,16 +136,16 @@ class TrackerActivity : AppCompatActivity(), RemainingPointsDialog.Callbacks {
         }
     }
 
-    private fun runTimerCoroutine() = lifecycleScope.launch {
-        val startingDate = Date()
-        while (state.value == State.TRACING) {
-            val difference = Date().time - startingDate.time
-            val formattedDifference =
-                    "${TimeUnit.MILLISECONDS.toHours(difference)}:" +
-                    "${TimeUnit.MILLISECONDS.toMinutes(difference) % 60}:" +
-                    String.format("%02d", TimeUnit.MILLISECONDS.toSeconds(difference) % 60)
-            binding.tvTrackingTime.text = formattedDifference
-            delay(1000)
+    private fun observeTimer() {
+        viewModel.passedTimeString.observe(this) { formattedTime ->
+            if (formattedTime != null) {
+                binding.tvTrackingTime.apply {
+                    visibility = View.VISIBLE
+                    text = formattedTime
+                }
+            } else {
+                binding.tvTrackingTime.visibility = View.INVISIBLE
+            }
         }
     }
 

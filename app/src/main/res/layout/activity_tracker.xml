@@ -11,12 +11,11 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:fillViewport="true"
-        android:paddingBottom="100dp"
-        android:clipToPadding="false">
+        android:clipToPadding="true">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="0dp">
+            android:layout_height="match_parent">
 
             <com.google.android.material.textview.MaterialTextView
                 android:id="@+id/tv_no_files"
@@ -41,24 +40,26 @@
     </androidx.core.widget.NestedScrollView>
 
     <com.google.android.material.bottomappbar.BottomAppBar
-        android:id="@+id/bottomAppBar"
+        android:id ="@+id/bottomAppBar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         style="@style/Widget.MaterialComponents.BottomAppBar.Colored"
         app:hideOnScroll="true"
         android:layout_gravity="bottom"
         app:menu="@menu/bottom_app_bar">
-
-
     </com.google.android.material.bottomappbar.BottomAppBar>
 
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/tv_tracking_time"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:background="@drawable/timer_rounded"
+        android:textColor="@color/white"
+        android:padding="5dp"
         android:visibility="invisible"
         app:layout_anchor="@id/fab_tracking"
-        android:translationY="-10dp"
+        android:translationY="-20dp"
+        android:textSize="15sp"
         app:layout_anchorGravity="center_horizontal"/>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
