@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.lifecycle.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import java.net.URI
 import java.util.*
 import java.util.concurrent.TimeUnit
 
@@ -18,8 +19,8 @@ class LocationsViewModel(
     private val _isAnyFileSelected: MutableLiveData<Boolean> = MutableLiveData(false)
     val isAnyFileSelected: LiveData<Boolean>
         get() = _isAnyFileSelected
-    private val _selectedPositions: MutableSet<Int> = mutableSetOf()
-    val selectedPositions: Set<Int>
+    private val _selectedPositions: MutableSet<URI> = mutableSetOf()
+    val selectedPositions: Set<URI>
         get() = _selectedPositions
     val locations: LiveData<List<LocationData>> = repository.getLocations().asLiveData()
     val newFileEvent = repository.newFileEvent
@@ -32,13 +33,13 @@ class LocationsViewModel(
         }
     }
 
-    fun addSelectedFile(position: Int) {
-        _selectedPositions.add(position)
+    fun addSelectedFile(uri: URI) {
+        _selectedPositions.add(uri)
         _isAnyFileSelected.value = true
     }
 
-    fun removeSelectedFile(position: Int) {
-        _selectedPositions.remove(position)
+    fun removeSelectedFile(uri: URI) {
+        _selectedPositions.remove(uri)
         if (_selectedPositions.isEmpty()) {
             _isAnyFileSelected.value = false
         }

@@ -4,6 +4,7 @@ import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
 import androidx.core.app.ActivityCompat
+import java.net.URI
 
 fun Context.hasPermission(permission: String): Boolean {
 
@@ -15,3 +16,6 @@ fun Context.hasPermission(permission: String): Boolean {
     return ActivityCompat.checkSelfPermission(this, permission) ==
             PackageManager.PERMISSION_GRANTED
 }
+
+fun URI.extractFileName(): String =
+    this.path.split('/').lastOrNull()?.substringBeforeLast('.') ?: ""

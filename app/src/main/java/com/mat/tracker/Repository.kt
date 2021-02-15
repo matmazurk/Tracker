@@ -11,6 +11,7 @@ import org.xmlpull.v1.XmlPullParserFactory
 import org.xmlpull.v1.XmlSerializer
 import java.io.File
 import java.io.OutputStreamWriter
+import java.net.URI
 import java.util.*
 import java.util.Calendar.*
 
@@ -21,14 +22,14 @@ class Repository(
 
     val newFileEvent: LiveData<Event<String?>>
         get() = _newFileEvent
-    val files: LiveData<List<String>>
+    val files: LiveData<List<URI>>
         get() = _files
     val receivingLocationUpdates = locationManager.receivingLocationUpdates
 
     private val context: Context by inject()
     private val appDirPath = "${context.dataDir}/"
     private val _newFileEvent: MutableLiveData<Event<String?>> = MutableLiveData()
-    private val _files: MutableLiveData<List<String>> = MutableLiveData()
+    private val _files: MutableLiveData<List<URI>> = MutableLiveData()
     private lateinit var fileObserver: FileObserver
 
     fun getLocations() =
@@ -71,7 +72,7 @@ class Repository(
         fileObserver.startWatching()
     }
 
-    private fun extractGpxFilesFromDir(dir: File): List<String> =
+    private fun extractGpxFilesFromDir(dir: File): List<URI> =
         dir.listFiles()
             .filter {
                 it.name.contains(".gpx")
@@ -80,7 +81,7 @@ class Repository(
                 Date(it.lastModified()).time
             }
             .map {
-                it.name.replace(".gpx", "")
+                it.toURI()
             }
 
     fun stopFileObserver() {

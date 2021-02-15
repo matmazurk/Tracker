@@ -2,7 +2,6 @@ package com.mat.tracker
 
 import android.content.Context
 import android.graphics.drawable.GradientDrawable
-import android.util.Log
 import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
@@ -10,16 +9,15 @@ import android.view.ViewGroup
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.textview.MaterialTextView
-import org.koin.androidx.viewmodel.compat.SharedViewModelCompat.sharedViewModel
 import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
+import java.net.URI
 
 class RecordsAdapter(
     private val context: Context,
     private val viewModel: LocationsViewModel
 ) : RecyclerView.Adapter<RecordsAdapter.ViewHolder>(), KoinComponent {
 
-    private var files: List<String> = listOf()
+    private var uris: List<URI> = listOf()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val view = LayoutInflater
@@ -30,8 +28,9 @@ class RecordsAdapter(
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val selected = viewModel.selectedPositions.contains(position)
-        holder.fileNameTextView.text = files[position]
+        val currentURI = uris[position]
+        val selected = viewModel.selectedPositions.contains(currentURI)
+        holder.fileNameTextView.text = currentURI.extractFileName()
         holder.itemView.isSelected = selected
         val typedValue = TypedValue()
         if (selected) {
@@ -45,18 +44,18 @@ class RecordsAdapter(
 
         holder.layout.setOnClickListener {
             if (selected) {
-                viewModel.removeSelectedFile(position)
+                viewModel.removeSelectedFile(currentURI)
             } else {
-                viewModel.addSelectedFile(position)
+                viewModel.addSelectedFile(currentURI)
             }
             notifyItemChanged(position)
         }
     }
 
-    override fun getItemCount(): Int = files.size
+    override fun getItemCount(): Int = uris.size
 
-    fun setFiles(files: List<String>) {
-        this.files = files
+    fun setFiles(files: List<URI>) {
+        this.uris = files
         notifyDataSetChanged()
     }
 
