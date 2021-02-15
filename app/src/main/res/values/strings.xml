@@ -17,4 +17,8 @@
     <string name="remaining_points_dialog_title">Handle saved points</string>
     <string name="remaining_points_dialog_message">There are remaining points from last recording.</string>
     <string name="gpx_file_icon">gpx file icon</string>
+    <string name="enable_background_location">Enable background location</string>
+    <string name="enhance_app_with_background_location_permissions">Enhance app with background location permissions.</string>
+    <string name="delete_file">Delete file</string>
+    <string name="delete_selected_files">Delete selected files</string>
 </resources>

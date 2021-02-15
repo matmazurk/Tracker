@@ -4,23 +4,32 @@
     <item
         android:id="@+id/options"
         android:title="@string/options"
-        android:contentDescription="@string/content_description_options"
-        />
+        android:contentDescription="@string/content_description_options" />
 
     <item
-        android:id="@+id/search"
-        android:icon="@drawable/ic_search_24"
-        android:title="@string/search"
-        android:contentDescription="@string/content_description_search"
-        app:showAsAction="ifRoom"
-        />
+        android:id="@+id/background_enhance"
+        android:title="@string/enable_background_location"
+        android:contentDescription="@string/enhance_app_with_background_location_permissions" />
+
+    <item
+        android:id="@+id/delete"
+        android:icon="@drawable/ic_baseline_delete_24"
+        android:title="@string/delete_file"
+        android:contentDescription="@string/delete_selected_files"
+        app:showAsAction="always" />
 
     <item
         android:id="@+id/share"
         android:icon="@drawable/ic_share_24"
         android:title="@string/share"
         android:contentDescription="@string/content_description_share"
-        app:showAsAction="ifRoom"
-        />
+        app:showAsAction="always" />
+
+    <item
+        android:id="@+id/search"
+        android:icon="@drawable/ic_search_24"
+        android:title="@string/search"
+        android:contentDescription="@string/content_description_search"
+        app:showAsAction="always" />
 
 </menu>

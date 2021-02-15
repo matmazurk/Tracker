@@ -1,5 +1,6 @@
 package com.mat.tracker
 
+import android.util.Log
 import androidx.lifecycle.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -14,7 +15,12 @@ class LocationsViewModel(
     private val _passedTimeString: MutableLiveData<String?> = MutableLiveData(null)
     val passedTimeString: LiveData<String?>
         get() = _passedTimeString
-    val rvSelectedPositions: MutableList<Int> = mutableListOf()
+    private val _isAnyFileSelected: MutableLiveData<Boolean> = MutableLiveData(false)
+    val isAnyFileSelected: LiveData<Boolean>
+        get() = _isAnyFileSelected
+    private val _selectedPositions: MutableSet<Int> = mutableSetOf()
+    val selectedPositions: Set<Int>
+        get() = _selectedPositions
     val locations: LiveData<List<LocationData>> = repository.getLocations().asLiveData()
     val newFileEvent = repository.newFileEvent
     val files = repository.files
@@ -25,6 +31,20 @@ class LocationsViewModel(
             TrackerActivity.State.NOT_TRACING
         }
     }
+
+    fun addSelectedFile(position: Int) {
+        _selectedPositions.add(position)
+        _isAnyFileSelected.value = true
+    }
+
+    fun removeSelectedFile(position: Int) {
+        _selectedPositions.remove(position)
+        if (_selectedPositions.isEmpty()) {
+            _isAnyFileSelected.value = false
+        }
+    }
+
+    fun clearSelections() = _selectedPositions.clear()
 
     fun startFileObserver() = repository.startFileObserver()
 
@@ -64,9 +84,9 @@ class LocationsViewModel(
         while (state.value == TrackerActivity.State.TRACING) {
             val difference = Date().time - startingTime.time
             val formattedDifference =
-                    "${TimeUnit.MILLISECONDS.toHours(difference)}:" +
-                            "${TimeUnit.MILLISECONDS.toMinutes(difference) % 60}:" +
-                            String.format("%02d", TimeUnit.MILLISECONDS.toSeconds(difference) % 60)
+                "${TimeUnit.MILLISECONDS.toHours(difference)}:" +
+                "${TimeUnit.MILLISECONDS.toMinutes(difference) % 60}:" +
+                String.format("%02d", TimeUnit.MILLISECONDS.toSeconds(difference) % 60)
             _passedTimeString.postValue(formattedDifference)
             delay(1000)
         }

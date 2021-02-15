@@ -76,6 +76,9 @@ class Repository(
             .filter {
                 it.name.contains(".gpx")
             }
+            .sortedByDescending {
+                Date(it.lastModified()).time
+            }
             .map {
                 it.name.replace(".gpx", "")
             }

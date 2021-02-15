@@ -25,7 +25,7 @@ class TrackerActivity : AppCompatActivity(), RemainingPointsDialog.Callbacks {
     private lateinit var permissionHandler: LocationPermissionHandler
     private lateinit var recyclerView: RecyclerView
     private var locations: List<LocationData> = listOf()
-    private val recordsAdapter = RecordsAdapter(this)
+    private lateinit var recordsAdapter: RecordsAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -39,6 +39,8 @@ class TrackerActivity : AppCompatActivity(), RemainingPointsDialog.Callbacks {
         observeNewFileEvent()
         observeFiles()
         observeTimer()
+        observeMenuItemClick()
+        observeAnyFileSelected()
     }
 
     override fun onPause() {
@@ -67,7 +69,6 @@ class TrackerActivity : AppCompatActivity(), RemainingPointsDialog.Callbacks {
 
     private fun observeAppState() {
         state.observe(this) { state ->
-                Log.i("app state", "change")
             when (state) {
                 State.TRACING -> {
                     binding.fabTracking.setImageResource(R.drawable.ic_stop_circle_24)
@@ -83,6 +84,7 @@ class TrackerActivity : AppCompatActivity(), RemainingPointsDialog.Callbacks {
     private fun observeNewFileEvent() {
         viewModel.newFileEvent.observe(this) { event ->
             event.getContentIfNotHandled()?.let { filename ->
+                viewModel.clearSelections()
                 Toast.makeText(this, "$filename created!", Toast.LENGTH_SHORT).show()
             }
         }
@@ -107,6 +109,7 @@ class TrackerActivity : AppCompatActivity(), RemainingPointsDialog.Callbacks {
     }
 
     private fun prepareRecyclerView() {
+        recordsAdapter = RecordsAdapter(this, viewModel)
         recyclerView = binding.rvRecords
         recyclerView.adapter = recordsAdapter
         recyclerView.layoutManager = GridLayoutManager(this, 3)
@@ -171,6 +174,37 @@ class TrackerActivity : AppCompatActivity(), RemainingPointsDialog.Callbacks {
                 dialog.dismiss()
             }
         dialog.show()
+    }
+
+    private fun observeMenuItemClick() {
+        binding.bottomAppBar.setOnMenuItemClickListener { menuItem ->
+            when (menuItem.itemId) {
+                R.id.background_enhance -> {
+                    permissionHandler.checkBackgroundLocationAndRun {}
+                    true
+                }
+                R.id.search -> {
+
+                    true
+                }
+                R.id.options -> {
+
+                    true
+                }
+                R.id.share -> {
+
+                    true
+                }
+                else -> false
+            }
+        }
+    }
+
+    private fun observeAnyFileSelected() {
+        viewModel.isAnyFileSelected.observe(this) { isAnySelected ->
+            binding.bottomAppBar.menu.getItem(2).isVisible = isAnySelected
+            binding.bottomAppBar.menu.getItem(3).isVisible = isAnySelected
+        }
     }
 
     enum class State {
