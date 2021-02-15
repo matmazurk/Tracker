@@ -8,6 +8,7 @@ import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.isGone
 import androidx.lifecycle.LiveData
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -72,10 +73,11 @@ class TrackerActivity : AppCompatActivity(), RemainingPointsDialog.Callbacks {
             when (state) {
                 State.TRACING -> {
                     binding.fabTracking.setImageResource(R.drawable.ic_stop_circle_24)
-
+                    binding.isTracing = true
                 }
                 State.NOT_TRACING -> {
                     binding.fabTracking.setImageResource(R.drawable.ic_terrain_24)
+                    binding.isTracing = false
                 }
             }
         }
@@ -94,11 +96,7 @@ class TrackerActivity : AppCompatActivity(), RemainingPointsDialog.Callbacks {
         viewModel.startFileObserver()
         viewModel.files.observe(this) { files ->
             recordsAdapter.setFiles(files)
-            if (viewModel.files.value.isNullOrEmpty()) {
-                binding.tvNoFiles.visibility = View.VISIBLE
-            } else {
-                binding.tvNoFiles.visibility = View.INVISIBLE
-            }
+            binding.anyRecordedFiles = !viewModel.files.value.isNullOrEmpty()
         }
     }
 
@@ -146,8 +144,6 @@ class TrackerActivity : AppCompatActivity(), RemainingPointsDialog.Callbacks {
                     visibility = View.VISIBLE
                     text = formattedTime
                 }
-            } else {
-                binding.tvTrackingTime.visibility = View.INVISIBLE
             }
         }
     }

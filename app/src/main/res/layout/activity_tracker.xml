@@ -1,74 +1,90 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".TrackerActivity">
 
-    <androidx.core.widget.NestedScrollView
+<layout>
+    
+    <data>
+        <variable
+            name="isTracing"
+            type="boolean" />
+        <variable
+            name="anyRecordedFiles"
+            type="boolean" />
+    </data>
+
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:fillViewport="true"
-        android:clipToPadding="true">
+        tools:context=".TrackerActivity">
 
-        <androidx.constraintlayout.widget.ConstraintLayout
+        <androidx.core.widget.NestedScrollView
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="match_parent"
+            android:fillViewport="true"
+            android:clipToPadding="true">
 
-            <com.google.android.material.textview.MaterialTextView
-                android:id="@+id/tv_no_files"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent"
+            <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:gravity="center"
-                android:text="@string/no_recorded_tracks"
-                android:textSize="50sp"/>
+                android:layout_height="match_parent">
 
-            <androidx.recyclerview.widget.RecyclerView
-                app:layout_constraintTop_toTopOf="parent"
-                android:id="@+id/rv_records"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
+                <com.google.android.material.textview.MaterialTextView
+                    android:id="@+id/tv_no_files"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    isGone="@{anyRecordedFiles}"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center"
+                    android:text="@string/no_recorded_tracks"
+                    android:textSize="50sp"/>
 
-        </androidx.constraintlayout.widget.ConstraintLayout>
+                <androidx.recyclerview.widget.RecyclerView
+                    app:layout_constraintTop_toTopOf="parent"
+                    android:id="@+id/rv_records"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
 
-    </androidx.core.widget.NestedScrollView>
+            </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <com.google.android.material.bottomappbar.BottomAppBar
-        android:id ="@+id/bottomAppBar"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        style="@style/Widget.MaterialComponents.BottomAppBar.Colored"
-        app:hideOnScroll="true"
-        android:layout_gravity="bottom"
-        app:menu="@menu/bottom_app_bar">
-    </com.google.android.material.bottomappbar.BottomAppBar>
+        </androidx.core.widget.NestedScrollView>
 
-    <com.google.android.material.textview.MaterialTextView
-        android:id="@+id/tv_tracking_time"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:background="@drawable/timer_rounded"
-        android:textColor="@color/white"
-        android:padding="5dp"
-        android:visibility="invisible"
-        app:layout_anchor="@id/fab_tracking"
-        android:translationY="-20dp"
-        android:textSize="15sp"
-        app:layout_anchorGravity="center_horizontal"/>
+        <com.google.android.material.bottomappbar.BottomAppBar
+            android:id ="@+id/bottomAppBar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            style="@style/Widget.MaterialComponents.BottomAppBar.Colored"
+            app:hideOnScroll="true"
+            android:layout_gravity="bottom"
+            app:menu="@menu/bottom_app_bar">
+        </com.google.android.material.bottomappbar.BottomAppBar>
 
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fab_tracking"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:srcCompat="@drawable/ic_terrain_24"
-        app:maxImageSize="40dp"
-        app:layout_anchor="@id/bottomAppBar"
-        android:contentDescription="@string/content_description_fab" />
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/tv_tracking_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/timer_rounded"
+            android:textColor="@color/white"
+            android:padding="5dp"
+            app:isGone="@{!isTracing}"
+            android:visibility="invisible"
+            app:layout_anchor="@id/fab_tracking"
+            android:translationY="-20dp"
+            android:textSize="15sp"
+            app:layout_anchorGravity="center_horizontal"/>
 
-</androidx.coordinatorlayout.widget.CoordinatorLayout>
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/fab_tracking"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:srcCompat="@drawable/ic_terrain_24"
+            app:maxImageSize="40dp"
+            app:layout_anchor="@id/bottomAppBar"
+            android:contentDescription="@string/content_description_fab" />
+
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
+    
+</layout>
