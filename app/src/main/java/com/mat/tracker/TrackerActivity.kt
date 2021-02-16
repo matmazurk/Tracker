@@ -1,14 +1,15 @@
 package com.mat.tracker
 
 import android.Manifest
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.content.pm.ResolveInfo
+import android.net.Uri
 import android.os.Bundle
-import android.util.Log
-import android.view.View
 import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.isGone
 import androidx.lifecycle.LiveData
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -141,7 +142,6 @@ class TrackerActivity : AppCompatActivity(), RemainingPointsDialog.Callbacks {
         viewModel.passedTimeString.observe(this) { formattedTime ->
             if (formattedTime != null) {
                 binding.tvTrackingTime.apply {
-                    visibility = View.VISIBLE
                     text = formattedTime
                 }
             }
@@ -151,8 +151,9 @@ class TrackerActivity : AppCompatActivity(), RemainingPointsDialog.Callbacks {
     private fun popFilenameDialog() {
         val input = EditText(this)
         val lp = LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.MATCH_PARENT)
+            LinearLayout.LayoutParams.MATCH_PARENT,
+            LinearLayout.LayoutParams.MATCH_PARENT
+        )
         input.layoutParams = lp
         val dialog = MaterialAlertDialogBuilder(this)
             .setTitle("Filename")
@@ -188,12 +189,34 @@ class TrackerActivity : AppCompatActivity(), RemainingPointsDialog.Callbacks {
                     true
                 }
                 R.id.share -> {
-
+                    triggerShareDialog()
                     true
                 }
                 else -> false
             }
         }
+    }
+
+    private fun triggerShareDialog() {
+        val files = arrayListOf<Uri>().apply {
+            addAll(viewModel.selectedPositions)
+        }
+        val intent = Intent.createChooser(
+            Intent().apply {
+                action = Intent.ACTION_SEND_MULTIPLE
+                type = "text/xml"
+                putParcelableArrayListExtra(Intent.EXTRA_STREAM, files)
+            },
+            "Share"
+        )
+        val resInfoList: List<ResolveInfo> = packageManager.queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY)
+        for (resolveInfo in resInfoList) {
+            val packageName = resolveInfo.activityInfo.packageName
+            files.forEach {
+                grantUriPermission(packageName, it, Intent.FLAG_GRANT_WRITE_URI_PERMISSION or Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            }
+        }
+        startActivity(intent)
     }
 
     private fun observeAnyFileSelected() {
@@ -207,5 +230,4 @@ class TrackerActivity : AppCompatActivity(), RemainingPointsDialog.Callbacks {
         TRACING,
         NOT_TRACING
     }
-
 }

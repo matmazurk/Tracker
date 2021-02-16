@@ -4,6 +4,7 @@ import android.content.Context
 import android.net.Uri
 import android.os.FileObserver
 import androidx.annotation.MainThread
+import androidx.core.content.FileProvider
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import org.koin.core.component.KoinComponent
@@ -28,7 +29,7 @@ class Repository(
     val receivingLocationUpdates = locationManager.receivingLocationUpdates
 
     private val context: Context by inject()
-    private val appDirPath = "${context.dataDir}/"
+    private val appDirPath = "${context.filesDir}/"
     private val _newFileEvent: MutableLiveData<Event<String?>> = MutableLiveData()
     private val _files: MutableLiveData<List<Uri>> = MutableLiveData()
     private lateinit var fileObserver: FileObserver
@@ -82,7 +83,7 @@ class Repository(
                 Date(it.lastModified()).time
             }
             .map {
-                Uri.fromFile(it)
+                FileProvider.getUriForFile(context, context.applicationContext.packageName + ".provider", it)
             }
 
     fun stopFileObserver() {
