@@ -2,6 +2,7 @@ package com.mat.tracker
 
 import android.content.Context
 import android.graphics.drawable.GradientDrawable
+import android.net.Uri
 import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
@@ -17,7 +18,7 @@ class RecordsAdapter(
     private val viewModel: LocationsViewModel
 ) : RecyclerView.Adapter<RecordsAdapter.ViewHolder>(), KoinComponent {
 
-    private var uris: List<URI> = listOf()
+    private var uris: List<Uri> = listOf()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val view = LayoutInflater
@@ -30,7 +31,7 @@ class RecordsAdapter(
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val currentURI = uris[position]
         val selected = viewModel.selectedPositions.contains(currentURI)
-        holder.fileNameTextView.text = currentURI.extractFileName()
+        holder.fileNameTextView.text = currentURI.pathSegments.lastOrNull()?.replace(".gpx", "")
         holder.itemView.isSelected = selected
         val typedValue = TypedValue()
         if (selected) {
@@ -54,7 +55,7 @@ class RecordsAdapter(
 
     override fun getItemCount(): Int = uris.size
 
-    fun setFiles(files: List<URI>) {
+    fun setFiles(files: List<Uri>) {
         this.uris = files
         notifyDataSetChanged()
     }

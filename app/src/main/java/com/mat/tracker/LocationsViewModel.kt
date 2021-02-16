@@ -1,5 +1,6 @@
 package com.mat.tracker
 
+import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.*
 import kotlinx.coroutines.delay
@@ -19,8 +20,8 @@ class LocationsViewModel(
     private val _isAnyFileSelected: MutableLiveData<Boolean> = MutableLiveData(false)
     val isAnyFileSelected: LiveData<Boolean>
         get() = _isAnyFileSelected
-    private val _selectedPositions: MutableSet<URI> = mutableSetOf()
-    val selectedPositions: Set<URI>
+    private val _selectedPositions: MutableSet<Uri> = mutableSetOf()
+    val selectedPositions: Set<Uri>
         get() = _selectedPositions
     val locations: LiveData<List<LocationData>> = repository.getLocations().asLiveData()
     val newFileEvent = repository.newFileEvent
@@ -33,12 +34,12 @@ class LocationsViewModel(
         }
     }
 
-    fun addSelectedFile(uri: URI) {
+    fun addSelectedFile(uri: Uri) {
         _selectedPositions.add(uri)
         _isAnyFileSelected.value = true
     }
 
-    fun removeSelectedFile(uri: URI) {
+    fun removeSelectedFile(uri: Uri) {
         _selectedPositions.remove(uri)
         if (_selectedPositions.isEmpty()) {
             _isAnyFileSelected.value = false

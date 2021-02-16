@@ -1,6 +1,7 @@
 package com.mat.tracker
 
 import android.content.Context
+import android.net.Uri
 import android.os.FileObserver
 import androidx.annotation.MainThread
 import androidx.lifecycle.LiveData
@@ -22,14 +23,14 @@ class Repository(
 
     val newFileEvent: LiveData<Event<String?>>
         get() = _newFileEvent
-    val files: LiveData<List<URI>>
+    val files: LiveData<List<Uri>>
         get() = _files
     val receivingLocationUpdates = locationManager.receivingLocationUpdates
 
     private val context: Context by inject()
     private val appDirPath = "${context.dataDir}/"
     private val _newFileEvent: MutableLiveData<Event<String?>> = MutableLiveData()
-    private val _files: MutableLiveData<List<URI>> = MutableLiveData()
+    private val _files: MutableLiveData<List<Uri>> = MutableLiveData()
     private lateinit var fileObserver: FileObserver
 
     fun getLocations() =
@@ -72,7 +73,7 @@ class Repository(
         fileObserver.startWatching()
     }
 
-    private fun extractGpxFilesFromDir(dir: File): List<URI> =
+    private fun extractGpxFilesFromDir(dir: File): List<Uri> =
         dir.listFiles()
             .filter {
                 it.name.contains(".gpx")
@@ -81,7 +82,7 @@ class Repository(
                 Date(it.lastModified()).time
             }
             .map {
-                it.toURI()
+                Uri.fromFile(it)
             }
 
     fun stopFileObserver() {
