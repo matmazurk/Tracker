@@ -18,9 +18,9 @@ import java.util.concurrent.TimeUnit
 
 class LocationManager(private val context: Context) {
 
-    private val _receivingLocationUpdates: MutableLiveData<Boolean> = MutableLiveData(false)
     val receivingLocationUpdates: LiveData<Boolean> get() = _receivingLocationUpdates
 
+    private val _receivingLocationUpdates: MutableLiveData<Boolean> = MutableLiveData(false)
     private val fusedLocationClient: FusedLocationProviderClient =
             LocationServices.getFusedLocationProviderClient(context)
 

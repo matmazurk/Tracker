@@ -9,6 +9,10 @@
         <variable
             name="anyRecordedFiles"
             type="boolean" />
+
+        <variable
+            name="viewModel"
+            type="com.mat.tracker.LocationsViewModel" />
     </data>
 
     <androidx.coordinatorlayout.widget.CoordinatorLayout
@@ -70,6 +74,7 @@
             android:textColor="@color/white"
             android:padding="5dp"
             app:isGone="@{!isTracing}"
+            android:text="@{viewModel.passedTimeString}"
             android:visibility="invisible"
             app:layout_anchor="@id/fab_tracking"
             android:translationY="-20dp"

@@ -1,32 +1,27 @@
 package com.mat.tracker
 
 import android.net.Uri
-import android.util.Log
 import androidx.lifecycle.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import java.net.URI
 import java.util.*
-import java.util.concurrent.TimeUnit
 
 class LocationsViewModel(
-    private val repository: Repository
+    private val fileRepository: FileRepository,
+    private val locationRepository: LocationRepository,
 ) : ViewModel() {
 
-    private lateinit var startingTime: Date
-    private val _passedTimeString: MutableLiveData<String?> = MutableLiveData(null)
-    val passedTimeString: LiveData<String?>
+    val passedTimeString: LiveData<String>
         get() = _passedTimeString
-    private val _isAnyFileSelected: MutableLiveData<Boolean> = MutableLiveData(false)
     val isAnyFileSelected: LiveData<Boolean>
         get() = _isAnyFileSelected
-    private val _selectedPositions: MutableSet<Uri> = mutableSetOf()
     val selectedPositions: Set<Uri>
         get() = _selectedPositions
-    val locations: LiveData<List<LocationData>> = repository.getLocations().asLiveData()
-    val newFileEvent = repository.newFileEvent
-    val files = repository.files
-    val state: LiveData<TrackerActivity.State> = Transformations.map(repository.receivingLocationUpdates) {
+    val fileCreationFailure: LiveData<Event<String>>
+        get() = _fileCreationFailure
+    val newFileEvent = fileRepository.newFileEvent
+    val files = fileRepository.files
+    val state: LiveData<TrackerActivity.State> = Transformations.map(locationRepository.receivingLocationUpdates) {
         if (it) {
             TrackerActivity.State.TRACING
         } else {
@@ -34,64 +29,85 @@ class LocationsViewModel(
         }
     }
 
-    fun addSelectedFile(uri: Uri) {
+    private lateinit var startingTime: Date
+    private val _passedTimeString: MutableLiveData<String> = MutableLiveData(null)
+    private val _isAnyFileSelected: MutableLiveData<Boolean> = MutableLiveData(false)
+    private val _fileCreationFailure: MutableLiveData<Event<String>> = MutableLiveData()
+    private val _selectedPositions: MutableSet<Uri> = mutableSetOf()
+
+    fun addFileSelection(uri: Uri) {
         _selectedPositions.add(uri)
         _isAnyFileSelected.value = true
     }
 
-    fun removeSelectedFile(uri: Uri) {
+    fun removeFileSelection(uri: Uri) {
         _selectedPositions.remove(uri)
         if (_selectedPositions.isEmpty()) {
             _isAnyFileSelected.value = false
         }
     }
 
+    suspend fun isAnyLocationRecorded() = locationRepository.isAnyLocationRecorded()
+
     fun clearSelections() = _selectedPositions.clear()
 
-    fun startFileObserver() = repository.startFileObserver()
+    fun startFileObserver() = fileRepository.startFileObserver()
 
-    fun stopFileObserver() = repository.stopFileObserver()
+    fun stopFileObserver() = fileRepository.stopFileObserver()
 
-    fun saveLocationsToFile(
-        filename: String,
-        locations: List<LocationData>
-    ) =
-        viewModelScope.launch {
-            repository.writeLocationsToFile(filename, locations)
+    fun saveLocationsToFile(filename: String) = viewModelScope.launch {
+        val locations = locationRepository.getLocations().filter { it.accuracy <= ACCURACY_THRESHOLD }
+        if (locations.isNotEmpty()) {
+            fileRepository.writeLocationsToFile(filename, locations)?.let {
+                _fileCreationFailure.value =
+                        Event("File name already taken.")
+            } ?: locationRepository.clearDatabase()
+        } else {
+            _fileCreationFailure.value =
+                Event("Last record doesn't contain correct data, it will be wiped out.")
+            locationRepository.clearDatabase()
         }
+    }
+
+    fun removeSelectedFiles() {
+        _selectedPositions.forEach {
+            fileRepository.removeFile(it)
+        }
+        _selectedPositions.clear()
+        _isAnyFileSelected.value = false
+    }
 
     fun clearLocations() =
         viewModelScope.launch {
-            repository.clearDatabase()
+            locationRepository.clearDatabase()
         }
 
     fun startTracking() {
         if (state.value != TrackerActivity.State.TRACING) {
             try {
-                repository.startTrackingLocation()
+                locationRepository.startTrackingLocation()
                 runTimer()
             } catch (permissionRevoked: SecurityException) {
 
             }
         }
-
     }
 
     fun stopTracking() {
-        repository.stopTrackingLocation()
+        locationRepository.stopTrackingLocation()
     }
 
     private fun runTimer() = viewModelScope.launch {
         startingTime = Date()
         while (state.value == TrackerActivity.State.TRACING) {
             val difference = Date().time - startingTime.time
-            val formattedDifference =
-                "${TimeUnit.MILLISECONDS.toHours(difference)}:" +
-                "${TimeUnit.MILLISECONDS.toMinutes(difference) % 60}:" +
-                String.format("%02d", TimeUnit.MILLISECONDS.toSeconds(difference) % 60)
-            _passedTimeString.postValue(formattedDifference)
+            val formattedDifference = difference.toHMMSS()
+            _passedTimeString.value = formattedDifference
             delay(1000)
         }
-        _passedTimeString.value = null
+    }
+
+    companion object {
+        private const val ACCURACY_THRESHOLD = 20
     }
 }

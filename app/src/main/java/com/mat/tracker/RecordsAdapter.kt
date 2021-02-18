@@ -11,7 +11,6 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.textview.MaterialTextView
 import org.koin.core.component.KoinComponent
-import java.net.URI
 
 class RecordsAdapter(
     private val context: Context,
@@ -45,9 +44,9 @@ class RecordsAdapter(
 
         holder.layout.setOnClickListener {
             if (selected) {
-                viewModel.removeSelectedFile(currentURI)
+                viewModel.removeFileSelection(currentURI)
             } else {
-                viewModel.addSelectedFile(currentURI)
+                viewModel.addFileSelection(currentURI)
             }
             notifyItemChanged(position)
         }

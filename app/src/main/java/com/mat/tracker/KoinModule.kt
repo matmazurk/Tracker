@@ -23,10 +23,14 @@ val appModule = module {
     }
 
     single {
-        Repository(get<TrackerDatabase>().locationsDao(), get())
+        FileRepository()
+    }
+
+    single {
+        LocationRepository(get<TrackerDatabase>().locationsDao(), get())
     }
 
     viewModel {
-        LocationsViewModel(get())
+        LocationsViewModel(get(), get())
     }
 }

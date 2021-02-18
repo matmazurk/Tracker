@@ -3,6 +3,7 @@ package com.mat.tracker
 import android.content.Context
 import android.net.Uri
 import android.os.FileObserver
+import android.util.Log
 import androidx.annotation.MainThread
 import androidx.core.content.FileProvider
 import androidx.lifecycle.LiveData
@@ -13,47 +14,23 @@ import org.xmlpull.v1.XmlPullParserFactory
 import org.xmlpull.v1.XmlSerializer
 import java.io.File
 import java.io.OutputStreamWriter
+import java.lang.Exception
 import java.net.URI
 import java.util.*
 import java.util.Calendar.*
 
-class Repository(
-    private val locationsDao: LocationsDao,
-    private val locationManager: LocationManager,
-) : KoinComponent {
+class FileRepository : KoinComponent {
 
     val newFileEvent: LiveData<Event<String?>>
         get() = _newFileEvent
     val files: LiveData<List<Uri>>
         get() = _files
-    val receivingLocationUpdates = locationManager.receivingLocationUpdates
 
     private val context: Context by inject()
     private val appDirPath = "${context.filesDir}/"
     private val _newFileEvent: MutableLiveData<Event<String?>> = MutableLiveData()
     private val _files: MutableLiveData<List<Uri>> = MutableLiveData()
     private lateinit var fileObserver: FileObserver
-
-    fun getLocations() =
-        locationsDao.getAllLocations()
-
-    @Throws(SecurityException::class)
-    @MainThread
-    fun startTrackingLocation() =
-        locationManager.startLocationUpdates()
-
-    @MainThread
-    fun stopTrackingLocation() =
-        locationManager.stopLocationUpdates()
-
-    suspend fun saveLocation(location: LocationData) =
-        locationsDao.insertLocation(location)
-
-    suspend fun saveLocations(locations: List<LocationData>) =
-        locationsDao.insertLocations(locations)
-
-    suspend fun clearDatabase() =
-        locationsDao.nukeTable()
 
     fun startFileObserver() {
         val appDir = File(appDirPath)
@@ -74,6 +51,10 @@ class Repository(
         fileObserver.startWatching()
     }
 
+    fun stopFileObserver() {
+        fileObserver.stopWatching()
+    }
+
     private fun extractGpxFilesFromDir(dir: File): List<Uri> =
         dir.listFiles()
             .filter {
@@ -86,23 +67,22 @@ class Repository(
                 FileProvider.getUriForFile(context, context.applicationContext.packageName + ".provider", it)
             }
 
-    fun stopFileObserver() {
-        fileObserver.stopWatching()
-    }
-
-    suspend fun writeLocationsToFile(
+    fun writeLocationsToFile(
         filename: String,
         locations: List<LocationData>
-    ) {
+    ): String? {
         val currentDate = Date()
-        writeGpxFile(
+        return writeGpxFile(
             locations,
             filename,
             "",
             "",
             currentDate.time
         )
-        clearDatabase()
+    }
+
+    fun removeFile(uri: Uri) {
+        context.contentResolver.delete(uri, null)
     }
 
     private fun writeGpxFile(
@@ -111,16 +91,16 @@ class Repository(
         description: String,
         authorName: String,
         time: Long
-    ) {
+    ): String? {
         var filePath = "${appDirPath}${fileName}.gpx"
         var file = File(filePath)
         if (file.exists()) {
-            filePath = "${filePath}_1"
-            file = File(filePath)
+            return fileName
         }
         file.createNewFile()
         val serializer = prepareXmlSerializer(file.writer(), locations, fileName, description, authorName, time)
         serializer.endDocument()
+        return null
     }
 
     private fun prepareXmlSerializer(
@@ -158,7 +138,7 @@ class Repository(
             endTag(null, "name")
             endTag(null, "author")
             startTag(null, "time")
-            text(convertMillisToFormattedString(time))
+            text(time.toGpxTime())
             endTag(null, "time")
             startTag(null, "bounds")
             attribute(null, "minlat", minLat.toString())
@@ -171,7 +151,7 @@ class Repository(
             text("Logged by $authorName using Tracker App")
             endTag(null, "src")
             startTag(null, "trkseg")
-            locations.forEachIndexed { index, it ->
+            locations.forEach { it ->
                 startTag(null, "trkpt")
                 attribute(null, "lat", it.latitude.toString())
                 attribute(null, "lon", it.longitude.toString())
@@ -179,7 +159,7 @@ class Repository(
                 text(it.altitude.toString())
                 endTag(null, "ele")
                 startTag(null, "time")
-                text(convertMillisToFormattedString(it.time))
+                text(it.time.toGpxTime())
                 endTag(null, "time")
                 endTag(null, "trkpt")
             }
@@ -188,20 +168,4 @@ class Repository(
         }
         return serializer
     }
-
-    private fun convertMillisToFormattedString(millis: Long): String {
-        val date = Date(millis)
-        val calendar = Calendar.getInstance().apply {
-            time = date
-        }
-        val year = calendar.get(YEAR)
-        val month = calendar.get(MONTH)
-        val day = calendar.get(DAY_OF_MONTH)
-        val hour = calendar.get(HOUR_OF_DAY)
-        val minute = calendar.get(MINUTE)
-        val second = calendar.get(SECOND)
-
-        return "$year-$month-${day}T$hour:$minute:${second}Z"
-    }
-
 }

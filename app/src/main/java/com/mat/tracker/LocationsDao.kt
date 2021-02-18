@@ -15,7 +15,10 @@ interface LocationsDao {
     suspend fun insertLocations(locations: List<LocationData>)
 
     @Query("SELECT * FROM LocationData")
-    fun getAllLocations() : Flow<List<LocationData>>
+    suspend fun getAllLocations(): List<LocationData>
+
+    @Query("SELECT EXISTS (SELECT 1 FROM LocationData)")
+    suspend fun isNotEmpty(): Boolean
 
     @Query("DELETE FROM LocationData")
     suspend fun nukeTable()

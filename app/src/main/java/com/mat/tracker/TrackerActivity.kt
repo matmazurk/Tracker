@@ -11,10 +11,12 @@ import android.widget.LinearLayout
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.mat.tracker.databinding.ActivityTrackerBinding
+import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class TrackerActivity : AppCompatActivity(), RemainingPointsDialog.Callbacks {
@@ -26,21 +28,21 @@ class TrackerActivity : AppCompatActivity(), RemainingPointsDialog.Callbacks {
     private lateinit var binding: ActivityTrackerBinding
     private lateinit var permissionHandler: LocationPermissionHandler
     private lateinit var recyclerView: RecyclerView
-    private var locations: List<LocationData> = listOf()
     private lateinit var recordsAdapter: RecordsAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityTrackerBinding.inflate(layoutInflater)
+        binding.lifecycleOwner = this
+        binding.viewModel = viewModel
         setContentView(binding.root)
         observeAppState()
-        observeLocations()
         permissionHandler = LocationPermissionHandler(this)
         prepareRecyclerView()
         setFabOnClickListener()
         observeNewFileEvent()
         observeFiles()
-        observeTimer()
+        observeFileCreationFailure()
         observeMenuItemClick()
         observeAnyFileSelected()
     }
@@ -93,17 +95,18 @@ class TrackerActivity : AppCompatActivity(), RemainingPointsDialog.Callbacks {
         }
     }
 
+    private fun observeFileCreationFailure() {
+        viewModel.fileCreationFailure.observe(this) { failureEvent ->
+            val failureText = failureEvent.getContentIfNotHandled()
+            Toast.makeText(this, failureText, Toast.LENGTH_LONG).show()
+        }
+    }
+
     private fun observeFiles() {
         viewModel.startFileObserver()
         viewModel.files.observe(this) { files ->
             recordsAdapter.setFiles(files)
             binding.anyRecordedFiles = !viewModel.files.value.isNullOrEmpty()
-        }
-    }
-
-    private fun observeLocations() {
-        viewModel.locations.observe(this) {
-            locations = it
         }
     }
 
@@ -119,30 +122,24 @@ class TrackerActivity : AppCompatActivity(), RemainingPointsDialog.Callbacks {
             when (state.value) {
                 State.TRACING -> {
                     viewModel.stopTracking()
-                    if (locations.isNotEmpty()) {
-                        val dialog = RemainingPointsDialog(this, false)
-                        dialog.show(supportFragmentManager, "tracking stopped dialog")
-                    }
-                }
-                State.NOT_TRACING -> {
-                    if (locations.isNotEmpty()) {
-                        val dialog = RemainingPointsDialog(this)
-                        dialog.show(supportFragmentManager, "remaining points dialog")
-                    } else {
-                        permissionHandler.checkFineLocationPermissionsAndRun {
-                            viewModel.startTracking()
+                    lifecycleScope.launch {
+                        if (viewModel.isAnyLocationRecorded()) {
+                            val dialog = RemainingPointsDialog(this@TrackerActivity, false)
+                            dialog.show(supportFragmentManager, "tracking stopped dialog")
                         }
                     }
                 }
-            }
-        }
-    }
-
-    private fun observeTimer() {
-        viewModel.passedTimeString.observe(this) { formattedTime ->
-            if (formattedTime != null) {
-                binding.tvTrackingTime.apply {
-                    text = formattedTime
+                State.NOT_TRACING -> {
+                    lifecycleScope.launch {
+                        if (viewModel.isAnyLocationRecorded()) {
+                            val dialog = RemainingPointsDialog(this@TrackerActivity)
+                            dialog.show(supportFragmentManager, "remaining points dialog")
+                        } else {
+                            permissionHandler.checkFineLocationPermissionsAndRun {
+                                viewModel.startTracking()
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -161,7 +158,7 @@ class TrackerActivity : AppCompatActivity(), RemainingPointsDialog.Callbacks {
             .setView(input)
             .setPositiveButton("Ok") { dialog, _ ->
                 if (input.text.isNotEmpty()) {
-                    viewModel.saveLocationsToFile(input.text.toString(), locations)
+                    viewModel.saveLocationsToFile(input.text.toString())
                     dialog.dismiss()
                 } else {
                     Toast.makeText(this, "Filename can't be empty!", Toast.LENGTH_SHORT).show()
@@ -190,6 +187,10 @@ class TrackerActivity : AppCompatActivity(), RemainingPointsDialog.Callbacks {
                 }
                 R.id.share -> {
                     triggerShareDialog()
+                    true
+                }
+                R.id.delete -> {
+                    viewModel.removeSelectedFiles()
                     true
                 }
                 else -> false
