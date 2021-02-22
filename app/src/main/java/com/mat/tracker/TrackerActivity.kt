@@ -237,10 +237,6 @@ class TrackerActivity : AppCompatActivity(), RemainingPointsDialog.Callbacks {
                     permissionHandler.checkBackgroundLocationAndRun {}
                     true
                 }
-                R.id.search -> {
-
-                    true
-                }
                 R.id.options -> {
 
                     true

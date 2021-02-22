@@ -16,20 +16,13 @@
         android:icon="@drawable/ic_baseline_delete_24"
         android:title="@string/delete_file"
         android:contentDescription="@string/delete_selected_files"
-        app:showAsAction="always" />
+        app:showAsAction="ifRoom" />
 
     <item
         android:id="@+id/share"
         android:icon="@drawable/ic_share_24"
         android:title="@string/share"
         android:contentDescription="@string/content_description_share"
-        app:showAsAction="always" />
-
-    <item
-        android:id="@+id/search"
-        android:icon="@drawable/ic_search_24"
-        android:title="@string/search"
-        android:contentDescription="@string/content_description_search"
-        app:showAsAction="always" />
+        app:showAsAction="ifRoom" />
 
 </menu>
