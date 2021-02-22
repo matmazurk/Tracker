@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name">Tracker</string>
     <string name="permissions_db_name">permissions</string>
+    <string name="options_db_name">options</string>
     <string name="options">Options</string>
     <string name="content_description_options">Tracking options...</string>
     <string name="content_description_fab">Start tracking FAB</string>
@@ -21,4 +22,10 @@
     <string name="enhance_app_with_background_location_permissions">Enhance app with background location permissions.</string>
     <string name="delete_file">Delete file</string>
     <string name="delete_selected_files">Delete selected files</string>
+    <string name="author_name">author name</string>
+    <string name="recording_description">recording description</string>
+    <string name="background_enhanced">Background location %1$s</string>
+    <string name="enabled">enabled</string>
+    <string name="disabled">disabled</string>
+    <string name="accuracy_threshold">accuracy threshold</string>
 </resources>

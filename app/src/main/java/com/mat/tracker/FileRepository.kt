@@ -1,5 +1,6 @@
 package com.mat.tracker
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.net.Uri
 import android.os.FileObserver
@@ -8,6 +9,8 @@ import androidx.annotation.MainThread
 import androidx.core.content.FileProvider
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.collect
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import org.xmlpull.v1.XmlPullParserFactory
@@ -27,6 +30,7 @@ class FileRepository : KoinComponent {
         get() = _files
 
     private val context: Context by inject()
+    private val optionsDataStore: OptionsDataStore by inject()
     private val appDirPath = "${context.filesDir}/"
     private val _newFileEvent: MutableLiveData<Event<String?>> = MutableLiveData()
     private val _files: MutableLiveData<List<Uri>> = MutableLiveData()
@@ -67,20 +71,33 @@ class FileRepository : KoinComponent {
                 FileProvider.getUriForFile(context, context.applicationContext.packageName + ".provider", it)
             }
 
-    fun writeLocationsToFile(
+    suspend fun writeLocationsToFile(
         filename: String,
-        locations: List<LocationData>
+        locations: List<LocationData>,
     ): String? {
-        val currentDate = Date()
-        return writeGpxFile(
-            locations,
-            filename,
-            "",
-            "",
-            currentDate.time
-        )
+        return CoroutineScope(Dispatchers.IO).async {
+            val currentDate = Date()
+            var authorName = ""
+            var description = ""
+            with(optionsDataStore) {
+                authorNameFlow.collect {
+                    authorName = it
+                }
+                recordingDescriptionFlow.collect {
+                    description = it
+                }
+            }
+            return@async writeGpxFile(
+                locations,
+                filename,
+                description,
+                authorName,
+                currentDate.time
+            )
+        }.await()
     }
 
+    @SuppressLint("NewApi")
     fun removeFile(uri: Uri) {
         context.contentResolver.delete(uri, null)
     }

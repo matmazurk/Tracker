@@ -3,12 +3,14 @@ package com.mat.tracker
 import android.net.Uri
 import androidx.lifecycle.*
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import java.util.*
 
 class LocationsViewModel(
     private val fileRepository: FileRepository,
     private val locationRepository: LocationRepository,
+    private val optionsDataStore: OptionsDataStore,
 ) : ViewModel() {
 
     val passedTimeString: LiveData<String>
@@ -56,7 +58,11 @@ class LocationsViewModel(
     fun stopFileObserver() = fileRepository.stopFileObserver()
 
     fun saveLocationsToFile(filename: String) = viewModelScope.launch {
-        val locations = locationRepository.getLocations().filter { it.accuracy <= ACCURACY_THRESHOLD }
+        var accuracyThreshold = ACCURACY_THRESHOLD
+        optionsDataStore.accuracyThresholdFlow.collect {
+            accuracyThreshold = it
+        }
+        val locations = locationRepository.getLocations().filter { it.accuracy <= accuracyThreshold }
         if (locations.isNotEmpty()) {
             fileRepository.writeLocationsToFile(filename, locations)?.let {
                 _fileCreationFailure.value =

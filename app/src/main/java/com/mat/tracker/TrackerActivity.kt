@@ -238,7 +238,8 @@ class TrackerActivity : AppCompatActivity(), RemainingPointsDialog.Callbacks {
                     true
                 }
                 R.id.options -> {
-
+                    val optionsDialog = OptionsDialog()
+                    optionsDialog.show(supportFragmentManager, "options dialog")
                     true
                 }
                 R.id.share -> {

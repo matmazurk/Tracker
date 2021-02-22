@@ -23,6 +23,10 @@ val appModule = module {
     }
 
     single {
+        OptionsDataStore(androidContext())
+    }
+
+    single {
         FileRepository()
     }
 
@@ -31,6 +35,6 @@ val appModule = module {
     }
 
     viewModel {
-        LocationsViewModel(get(), get())
+        LocationsViewModel(get(), get(), get())
     }
 }
