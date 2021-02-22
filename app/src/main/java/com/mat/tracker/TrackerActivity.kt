@@ -1,19 +1,31 @@
 package com.mat.tracker
 
 import android.Manifest
+import android.app.Activity
 import android.content.Intent
+import android.content.IntentSender
 import android.content.pm.PackageManager
 import android.content.pm.ResolveInfo
 import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.Toast
+import androidx.activity.result.IntentSenderRequest
+import androidx.activity.result.contract.ActivityResultContract
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.gms.common.api.ApiException
+import com.google.android.gms.common.api.ResolvableApiException
+import com.google.android.gms.location.LocationRequest
+import com.google.android.gms.location.LocationServices
+import com.google.android.gms.location.LocationSettingsRequest
+import com.google.android.gms.location.LocationSettingsStatusCodes
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.mat.tracker.databinding.ActivityTrackerBinding
 import kotlinx.coroutines.launch
@@ -29,6 +41,13 @@ class TrackerActivity : AppCompatActivity(), RemainingPointsDialog.Callbacks {
     private lateinit var permissionHandler: LocationPermissionHandler
     private lateinit var recyclerView: RecyclerView
     private lateinit var recordsAdapter: RecordsAdapter
+    private val resolutionForResult = registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) {
+        run {
+            if (it.resultCode == Activity.RESULT_OK) {
+                checkPermissionsAndStartTracking()
+            }
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -39,12 +58,16 @@ class TrackerActivity : AppCompatActivity(), RemainingPointsDialog.Callbacks {
         observeAppState()
         permissionHandler = LocationPermissionHandler(this)
         prepareRecyclerView()
-        setFabOnClickListener()
         observeNewFileEvent()
         observeFiles()
         observeFileCreationFailure()
         observeMenuItemClick()
         observeAnyFileSelected()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        setFabOnClickListener()
     }
 
     override fun onPause() {
@@ -135,12 +158,49 @@ class TrackerActivity : AppCompatActivity(), RemainingPointsDialog.Callbacks {
                             val dialog = RemainingPointsDialog(this@TrackerActivity)
                             dialog.show(supportFragmentManager, "remaining points dialog")
                         } else {
-                            permissionHandler.checkFineLocationPermissionsAndRun {
-                                viewModel.startTracking()
+                            checkSettingsAndRun {
+                                run {
+                                    checkPermissionsAndStartTracking()
+                                }
                             }
                         }
                     }
                 }
+            }
+        }
+    }
+
+    private fun checkSettingsAndRun(block: () -> Unit) {
+        val locationReq = LocationRequest.create().apply {
+            priority = LocationRequest.PRIORITY_HIGH_ACCURACY
+        }
+        val builder = LocationSettingsRequest.Builder().apply {
+            addLocationRequest(locationReq)
+        }
+        val result = LocationServices.getSettingsClient(this).checkLocationSettings(builder.build())
+        result.addOnSuccessListener { response ->
+            val states = response.locationSettingsStates
+            if (states.isLocationPresent) {
+                block()
+            }
+        }
+        result.addOnFailureListener { exception ->
+            if (exception is ResolvableApiException) {
+                try {
+                    val intentSenderRequest = IntentSenderRequest.Builder(exception.resolution).build()
+                    resolutionForResult.launch(intentSenderRequest)
+                } catch(sendEx: IntentSender.SendIntentException) {
+
+                }
+            }
+        }
+
+    }
+
+    private fun checkPermissionsAndStartTracking() {
+        if (this::permissionHandler.isInitialized) {
+            permissionHandler.checkFineLocationPermissionsAndRun {
+                viewModel.startTracking()
             }
         }
     }

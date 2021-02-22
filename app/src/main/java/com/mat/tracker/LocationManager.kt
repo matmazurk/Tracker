@@ -27,7 +27,7 @@ class LocationManager(private val context: Context) {
     private val locationRequest: LocationRequest = LocationRequest().apply {
         interval = TimeUnit.SECONDS.toMillis(INTERVAL_DURATION_SECONDS)
         fastestInterval = TimeUnit.SECONDS.toMillis(FASTEST_INTERVAL_DURATION_SECONDS)
-        maxWaitTime = TimeUnit.MINUTES.toMillis(MAX_WAIT_TIME_MINUTES)
+        maxWaitTime = TimeUnit.SECONDS.toMillis(MAX_WAIT_TIME_SECONDS)
         priority = LocationRequest.PRIORITY_HIGH_ACCURACY
     }
 
@@ -59,8 +59,8 @@ class LocationManager(private val context: Context) {
     }
 
     companion object {
-        private const val INTERVAL_DURATION_SECONDS = 30L
-        private const val FASTEST_INTERVAL_DURATION_SECONDS = 15L
-        private const val MAX_WAIT_TIME_MINUTES = 1L
+        private const val INTERVAL_DURATION_SECONDS = 10L
+        private const val FASTEST_INTERVAL_DURATION_SECONDS = INTERVAL_DURATION_SECONDS / 2
+        private const val MAX_WAIT_TIME_SECONDS = INTERVAL_DURATION_SECONDS * 2
     }
 }
