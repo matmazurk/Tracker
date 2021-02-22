@@ -42,10 +42,8 @@ class TrackerActivity : AppCompatActivity(), RemainingPointsDialog.Callbacks {
     private lateinit var recyclerView: RecyclerView
     private lateinit var recordsAdapter: RecordsAdapter
     private val resolutionForResult = registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) {
-        run {
-            if (it.resultCode == Activity.RESULT_OK) {
-                checkPermissionsAndStartTracking()
-            }
+        if (it.resultCode == Activity.RESULT_OK) {
+            checkPermissionsAndStartTracking()
         }
     }
 
@@ -247,7 +245,9 @@ class TrackerActivity : AppCompatActivity(), RemainingPointsDialog.Callbacks {
                     true
                 }
                 R.id.delete -> {
-                    viewModel.removeSelectedFiles()
+                    triggerFilesDeletionConfirmationDialog {
+                        viewModel.removeSelectedFiles()
+                    }
                     true
                 }
                 else -> false
@@ -275,6 +275,21 @@ class TrackerActivity : AppCompatActivity(), RemainingPointsDialog.Callbacks {
             }
         }
         startActivity(intent)
+    }
+
+    private fun triggerFilesDeletionConfirmationDialog(accepted: () -> Unit) {
+        val dialog = MaterialAlertDialogBuilder(this).apply {
+            title = getString(R.string.file_deletion_confirmation_dialog_title)
+            setMessage(getString(R.string.file_deletion_confirmation_dialog_message, viewModel.selectedPositions.size))
+            setPositiveButton("OK") { dialog, _ ->
+                accepted()
+                dialog.dismiss()
+            }
+            setNegativeButton(getString(R.string.cancel)) { dialog, _ ->
+                dialog.dismiss()
+            }
+        }
+        dialog.show()
     }
 
     private fun observeAnyFileSelected() {

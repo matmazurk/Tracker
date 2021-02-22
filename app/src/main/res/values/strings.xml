@@ -28,4 +28,6 @@
     <string name="enabled">enabled</string>
     <string name="disabled">disabled</string>
     <string name="accuracy_threshold">accuracy threshold</string>
+    <string name="file_deletion_confirmation_dialog_title">Files removal</string>
+    <string name="file_deletion_confirmation_dialog_message">Do you really want to delete %1$d files?</string>
 </resources>
