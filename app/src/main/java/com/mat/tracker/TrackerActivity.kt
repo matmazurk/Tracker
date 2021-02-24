@@ -8,25 +8,20 @@ import android.content.pm.PackageManager
 import android.content.pm.ResolveInfo
 import android.net.Uri
 import android.os.Bundle
-import android.util.Log
-import android.widget.EditText
-import android.widget.LinearLayout
 import android.widget.Toast
 import androidx.activity.result.IntentSenderRequest
-import androidx.activity.result.contract.ActivityResultContract
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.google.android.gms.common.api.ApiException
+import com.afollestad.materialdialogs.MaterialDialog
+import com.afollestad.materialdialogs.input.input
 import com.google.android.gms.common.api.ResolvableApiException
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.LocationSettingsRequest
-import com.google.android.gms.location.LocationSettingsStatusCodes
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.mat.tracker.databinding.ActivityTrackerBinding
 import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.viewModel
@@ -187,12 +182,10 @@ class TrackerActivity : AppCompatActivity(), RemainingPointsDialog.Callbacks {
                 try {
                     val intentSenderRequest = IntentSenderRequest.Builder(exception.resolution).build()
                     resolutionForResult.launch(intentSenderRequest)
-                } catch(sendEx: IntentSender.SendIntentException) {
-
+                } catch (sendEx: IntentSender.SendIntentException) {
                 }
             }
         }
-
     }
 
     private fun checkPermissionsAndStartTracking() {
@@ -204,28 +197,17 @@ class TrackerActivity : AppCompatActivity(), RemainingPointsDialog.Callbacks {
     }
 
     private fun popFilenameDialog() {
-        val input = EditText(this)
-        val lp = LinearLayout.LayoutParams(
-            LinearLayout.LayoutParams.MATCH_PARENT,
-            LinearLayout.LayoutParams.MATCH_PARENT
-        )
-        input.layoutParams = lp
-        val dialog = MaterialAlertDialogBuilder(this)
-            .setTitle("Filename")
-            .setMessage("Provide file name:")
-            .setView(input)
-            .setPositiveButton("Ok") { dialog, _ ->
-                if (input.text.isNotEmpty()) {
-                    viewModel.saveLocationsToFile(input.text.toString())
-                    dialog.dismiss()
-                } else {
-                    Toast.makeText(this, "Filename can't be empty!", Toast.LENGTH_SHORT).show()
-                }
+        MaterialDialog(this).show {
+            title(text = getString(R.string.provide_filename))
+            input(
+                hint = getString(R.string.filename),
+                waitForPositiveButton = true,
+                allowEmpty = false,
+            ) { _, text ->
+                viewModel.saveLocationsToFile(text.toString())
             }
-            .setNegativeButton("Cancel") { dialog, _ ->
-                dialog.dismiss()
-            }
-        dialog.show()
+            positiveButton(text = getString(R.string.ok))
+        }
     }
 
     private fun observeMenuItemClick() {
@@ -265,7 +247,7 @@ class TrackerActivity : AppCompatActivity(), RemainingPointsDialog.Callbacks {
                 type = "text/xml"
                 putParcelableArrayListExtra(Intent.EXTRA_STREAM, files)
             },
-            "Share"
+            getString(R.string.share)
         )
         val resInfoList: List<ResolveInfo> = packageManager.queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY)
         for (resolveInfo in resInfoList) {
@@ -278,18 +260,17 @@ class TrackerActivity : AppCompatActivity(), RemainingPointsDialog.Callbacks {
     }
 
     private fun triggerFilesDeletionConfirmationDialog(accepted: () -> Unit) {
-        val dialog = MaterialAlertDialogBuilder(this).apply {
-            title = getString(R.string.file_deletion_confirmation_dialog_title)
-            setMessage(getString(R.string.file_deletion_confirmation_dialog_message, viewModel.selectedPositions.size))
-            setPositiveButton("OK") { dialog, _ ->
+        MaterialDialog(this).show {
+            title(text = getString(R.string.file_deletion_confirmation_dialog_title))
+            message(text = getString(R.string.file_deletion_confirmation_dialog_message, viewModel.selectedPositions.size))
+            positiveButton(text = getString(R.string.ok)) {
                 accepted()
-                dialog.dismiss()
+                it.dismiss()
             }
-            setNegativeButton(getString(R.string.cancel)) { dialog, _ ->
-                dialog.dismiss()
+            negativeButton(text = getString(R.string.cancel)) {
+                it.dismiss()
             }
         }
-        dialog.show()
     }
 
     private fun observeAnyFileSelected() {

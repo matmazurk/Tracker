@@ -30,4 +30,8 @@
     <string name="accuracy_threshold">accuracy threshold</string>
     <string name="file_deletion_confirmation_dialog_title">Files removal</string>
     <string name="file_deletion_confirmation_dialog_message">Do you really want to delete %1$d files?</string>
+    <string name="provide_filename">Provide filename</string>
+    <string name="filename">filename</string>
+    <string name="ok">OK</string>
+
 </resources>
