@@ -52,7 +52,8 @@
             android:id="@+id/tiet_accuracy_threshold"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:inputType="numberDecimal"
+            android:digits="0123456789."
+            android:inputType="number"
             android:gravity="center"
             android:minWidth="300dp"
             android:textSize="@dimen/options_dialog_text_size"/>

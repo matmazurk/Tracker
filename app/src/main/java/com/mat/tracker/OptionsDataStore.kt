@@ -1,6 +1,7 @@
 package com.mat.tracker
 
 import android.content.Context
+import android.util.Log
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
@@ -35,18 +36,23 @@ class OptionsDataStore(context: Context) {
     suspend fun saveAuthorName(name: String) {
         dataStore.edit { preferences ->
             preferences[NAME_KEY] = name
+            return@edit
         }
     }
 
     suspend fun saveRecordingDescription(description: String) {
         dataStore.edit { preferences ->
             preferences[DESCRIPTION_KEY] = description
+            Log.i("dupakso", "dupsko")
+            return@edit
         }
+
     }
 
     suspend fun saveAccuracyThreshold(threshold: Int) {
         dataStore.edit { preferences ->
             preferences[ACCURACY_KEY] = threshold
+            return@edit
         }
     }
 

@@ -48,11 +48,15 @@ class OptionsDialog : DialogFragment(), KoinComponent {
                 else
                     getString(R.string.background_enhanced, getString(R.string.disabled))
             btSave.setOnClickListener {
-                lifecycleScope.launch {
-                    with(optionsDataStore) {
+                with(optionsDataStore) {
+                    lifecycleScope.launch {
+                        saveAccuracyThreshold(Integer.parseInt(tietAccuracyThreshold.text.toString()))
+                    }
+                    lifecycleScope.launch {
                         saveAuthorName(tietAuthorName.text.toString())
+                    }
+                    lifecycleScope.launch {
                         saveRecordingDescription(tietRecordingDescription.text.toString())
-                        saveAccuracyThreshold(tietAccuracyThreshold.text.toString().toInt())
                     }
                 }
                 dismiss()
