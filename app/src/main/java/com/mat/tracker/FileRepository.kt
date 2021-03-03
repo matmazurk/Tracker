@@ -164,9 +164,10 @@ class FileRepository : KoinComponent {
             attribute(null, "maxlon", maxLon.toString())
             endTag(null, "bounds")
             endTag(null, "metadata")
-            startTag(null, "src")
-            text("Logged by $authorName using Tracker App")
-            endTag(null, "src")
+            startTag(null, "trk")
+            startTag(null, "name")
+                text(description)
+            endTag(null, "name")
             startTag(null, "trkseg")
             locations.forEach { it ->
                 startTag(null, "trkpt")
@@ -181,6 +182,7 @@ class FileRepository : KoinComponent {
                 endTag(null, "trkpt")
             }
             endTag(null, "trkseg")
+            endTag(null, "trk")
             endTag(null, "gpx")
         }
         return serializer

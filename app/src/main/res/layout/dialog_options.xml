@@ -5,6 +5,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
+    android:id="@+id/options_dialog_layout"
     android:orientation="vertical"
     android:layout_margin="10dp"
     tools:context=".OptionsDialog">

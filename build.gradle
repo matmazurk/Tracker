@@ -1,10 +1,13 @@
 buildscript {
-    ext.kotlin_version = "1.4.30"
-    ext.koin_version = '2.2.2'
-    ext.nav_version = "2.3.2"
-    ext.room_version = "2.2.6"
-    ext.work_version = "2.4.0"
-    ext.lifecycle_version = "2.3.0"
+    ext {
+        kotlin_version = "1.4.30"
+        koin_version = '2.2.2'
+        nav_version = "2.3.2"
+        room_version = "2.2.6"
+        work_version = "2.4.0"
+        lifecycle_version = "2.3.0"
+        mockk_version = "1.10.6"
+    }
 
     repositories {
         google()

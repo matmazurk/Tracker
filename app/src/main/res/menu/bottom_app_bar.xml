@@ -15,6 +15,7 @@
         android:id="@+id/delete"
         android:icon="@drawable/ic_baseline_delete_24"
         android:title="@string/delete_file"
+
         android:contentDescription="@string/delete_selected_files"
         app:showAsAction="ifRoom" />
 
