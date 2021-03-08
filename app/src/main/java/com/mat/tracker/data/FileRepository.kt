@@ -1,14 +1,16 @@
-package com.mat.tracker
+package com.mat.tracker.data
 
 import android.annotation.SuppressLint
 import android.content.Context
 import android.net.Uri
 import android.os.FileObserver
-import android.util.Log
-import androidx.annotation.MainThread
 import androidx.core.content.FileProvider
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import com.mat.tracker.Event
+import com.mat.tracker.LocationData
+import com.mat.tracker.OptionsDataStore
+import com.mat.tracker.toGpxTime
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.collect
 import org.koin.core.component.KoinComponent
@@ -17,8 +19,6 @@ import org.xmlpull.v1.XmlPullParserFactory
 import org.xmlpull.v1.XmlSerializer
 import java.io.File
 import java.io.OutputStreamWriter
-import java.lang.Exception
-import java.net.URI
 import java.util.*
 import java.util.Calendar.*
 
@@ -72,8 +72,8 @@ class FileRepository : KoinComponent {
             }
 
     suspend fun writeLocationsToFile(
-        filename: String,
-        locations: List<LocationData>,
+            filename: String,
+            locations: List<LocationData>,
     ): String? {
         return CoroutineScope(Dispatchers.IO).async {
             val currentDate = Date()
@@ -103,11 +103,11 @@ class FileRepository : KoinComponent {
     }
 
     private fun writeGpxFile(
-        locations: List<LocationData>,
-        fileName: String,
-        description: String,
-        authorName: String,
-        time: Long
+            locations: List<LocationData>,
+            fileName: String,
+            description: String,
+            authorName: String,
+            time: Long
     ): String? {
         var filePath = "${appDirPath}${fileName}.gpx"
         var file = File(filePath)
@@ -121,12 +121,12 @@ class FileRepository : KoinComponent {
     }
 
     private fun prepareXmlSerializer(
-        output: OutputStreamWriter,
-        locations: List<LocationData>,
-        fileName: String,
-        description: String,
-        authorName: String,
-        time: Long
+            output: OutputStreamWriter,
+            locations: List<LocationData>,
+            fileName: String,
+            description: String,
+            authorName: String,
+            time: Long
     ): XmlSerializer  {
         val serializer = XmlPullParserFactory.newInstance().newSerializer()
         serializer.setOutput(output)

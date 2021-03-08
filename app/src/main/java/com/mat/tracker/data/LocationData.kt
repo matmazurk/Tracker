@@ -1,4 +1,4 @@
-package com.mat.tracker
+package com.mat.tracker.data
 
 import android.location.Location
 import androidx.room.Entity

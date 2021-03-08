@@ -2,15 +2,17 @@ package com.mat.tracker
 
 import android.net.Uri
 import androidx.lifecycle.*
+import com.mat.tracker.data.FileRepository
+import com.mat.tracker.data.LocationRepository
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import java.util.*
 
 class LocationsViewModel(
-    private val fileRepository: FileRepository,
-    private val locationRepository: LocationRepository,
-    private val optionsDataStore: OptionsDataStore,
+        private val fileRepository: FileRepository,
+        private val locationRepository: LocationRepository,
+        private val optionsDataStore: OptionsDataStore,
 ) : ViewModel() {
 
     val passedTimeString: LiveData<String>

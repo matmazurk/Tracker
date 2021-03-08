@@ -1,7 +1,6 @@
-package com.mat.tracker
+package com.mat.tracker.dialogs
 
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup

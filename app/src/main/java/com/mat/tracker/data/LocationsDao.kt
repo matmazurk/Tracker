@@ -1,4 +1,4 @@
-package com.mat.tracker
+package com.mat.tracker.data
 
 import androidx.room.Dao
 import androidx.room.Insert

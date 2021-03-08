@@ -6,7 +6,7 @@
     android:id="@+id/frameLayout"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    tools:context=".RemainingPointsDialog">
+    tools:context=".dialogs.RemainingPointsDialog">
 
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/tv_dialog_title"

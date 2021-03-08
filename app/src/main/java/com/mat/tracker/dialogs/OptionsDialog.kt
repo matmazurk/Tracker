@@ -1,18 +1,17 @@
-package com.mat.tracker
+package com.mat.tracker.dialogs
 
 import android.Manifest
-import android.content.pm.PackageManager
 import android.os.Bundle
-import android.util.Log
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.lifecycleScope
+import com.mat.tracker.OptionsDataStore
+import com.mat.tracker.R
 import com.mat.tracker.databinding.DialogOptionsBinding
+import com.mat.tracker.hasPermission
 import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 import org.koin.core.component.KoinComponent

@@ -1,19 +1,17 @@
-package com.mat.tracker
+package com.mat.tracker.data
 
 import android.Manifest
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
-import android.location.Location
-import android.util.Log
 import androidx.annotation.MainThread
-import androidx.core.content.ContextCompat
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationServices
+import com.mat.tracker.LocationUpdatesBroadcastReceiver
+import com.mat.tracker.hasPermission
 import java.util.concurrent.TimeUnit
 
 class LocationManager(private val context: Context) {

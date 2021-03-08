@@ -1,11 +1,11 @@
-package com.mat.tracker
+package com.mat.tracker.data
 
 import androidx.annotation.MainThread
 import org.koin.core.component.KoinComponent
 
 class LocationRepository(
-    private val locationsDao: LocationsDao,
-    private val locationManager: LocationManager,
+        private val locationsDao: LocationsDao,
+        private val locationManager: LocationManager,
 ) : KoinComponent {
 
     val receivingLocationUpdates = locationManager.receivingLocationUpdates

@@ -1,4 +1,4 @@
-package com.mat.tracker
+package com.mat.tracker.adapters
 
 import android.content.Context
 import android.graphics.drawable.GradientDrawable
@@ -10,6 +10,8 @@ import android.view.ViewGroup
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.textview.MaterialTextView
+import com.mat.tracker.LocationsViewModel
+import com.mat.tracker.R
 import org.koin.core.component.KoinComponent
 
 class RecordsAdapter(

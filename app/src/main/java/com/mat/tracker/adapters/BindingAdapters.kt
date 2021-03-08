@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.mat.tracker
+package com.mat.tracker.adapters
 
 import android.view.View
 import androidx.databinding.BindingAdapter

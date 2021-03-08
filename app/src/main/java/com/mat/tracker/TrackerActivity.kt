@@ -22,7 +22,11 @@ import com.google.android.gms.common.api.ResolvableApiException
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.LocationSettingsRequest
+import com.mat.tracker.adapters.RecordsAdapter
 import com.mat.tracker.databinding.ActivityTrackerBinding
+import com.mat.tracker.dialogs.OptionsDialog
+import com.mat.tracker.dialogs.RemainingPointsDialog
+import com.mat.tracker.permissions.LocationPermissionHandler
 import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.viewModel
 

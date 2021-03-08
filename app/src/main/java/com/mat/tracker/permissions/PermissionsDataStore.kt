@@ -1,4 +1,4 @@
-package com.mat.tracker
+package com.mat.tracker.permissions
 
 import android.content.Context
 import androidx.datastore.preferences.core.edit
@@ -6,6 +6,7 @@ import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.createDataStore
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import com.mat.tracker.R
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collect
