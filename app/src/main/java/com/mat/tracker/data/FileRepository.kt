@@ -8,7 +8,6 @@ import androidx.core.content.FileProvider
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.mat.tracker.Event
-import com.mat.tracker.LocationData
 import com.mat.tracker.OptionsDataStore
 import com.mat.tracker.toGpxTime
 import kotlinx.coroutines.*

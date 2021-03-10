@@ -6,6 +6,7 @@ import android.content.Intent
 import android.util.Log
 import com.google.android.gms.location.LocationResult
 import com.mat.tracker.data.LocationRepository
+import com.mat.tracker.data.toLocationData
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
